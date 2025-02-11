@@ -1,5 +1,5 @@
 import os
-from typing import Final, final, AsyncGenerator, Literal
+from typing import final, AsyncGenerator, Literal
 
 import uvicorn
 from dotenv import load_dotenv
@@ -15,7 +15,7 @@ from pydantic import BaseModel
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-app: Final[FastAPI] = FastAPI(
+app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/openapi.json",
@@ -27,9 +27,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-main_app = FastAPI()
-main_app.mount("/", app)
 
 QA_PROMPT = PromptTemplate(
     template=(
@@ -56,10 +53,8 @@ REFINE_PROMPT = PromptTemplate(
 
 storage_context = StorageContext.from_defaults(persist_dir="output/index")
 index = load_index_from_storage(storage_context)
-llm = OpenAI(model="gpt-4o", temperature=0.7, streaming=True)
-embedding_model = OpenAIEmbedding(model="text-embedding-ada-002")
-Settings.llm = llm
-Settings.embed_model = embedding_model
+Settings.llm = OpenAI(model="gpt-4o", temperature=0.7, streaming=True)
+Settings.embed_model = OpenAIEmbedding(model="text-embedding-ada-002")
 query_engine = index.as_query_engine(
     settings=Settings,
     response_mode="refine",
@@ -81,7 +76,7 @@ class _ChatCompletionPayload(BaseModel):
 
 
 async def _chat_completion_stream(
-    payload: _ChatCompletionPayload,
+        payload: _ChatCompletionPayload,
 ) -> AsyncGenerator[str, None]:
     user_message = payload.messages[-1].content
     response = query_engine.query(user_message)
@@ -91,10 +86,10 @@ async def _chat_completion_stream(
 
 @app.post("/chat_completion")
 async def _chat_completion(
-    payload: _ChatCompletionPayload,
+        payload: _ChatCompletionPayload,
 ) -> StreamingResponse:
     return StreamingResponse(_chat_completion_stream(payload), media_type="text/plain")
 
 
 if __name__ == "__main__":
-    uvicorn.run(main_app, host="0.0.0.0", port=8080, log_level="debug")
+    uvicorn.run(app, host="0.0.0.0", port=8080, log_level="debug")

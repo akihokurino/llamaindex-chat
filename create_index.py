@@ -23,14 +23,14 @@ if __name__ == "__main__":
     documents = [
         Document(
             text=row["text"],
-            metadata={
-                "file_id": row["file_id"],
-                "page_number": row["page_number"],
-                "summary": row.get("summary", ""),
-                "tags": (
-                    row.get("tags", "").split(",") if pd.notna(row.get("tags")) else []
-                ),
-            },
+            # metadata={
+            #     "file_id": row["file_id"],
+            #     "page_number": row["page_number"],
+            #     "summary": row.get("summary", ""),
+            #     "tags": (
+            #         row.get("tags", "").split(",") if pd.notna(row.get("tags")) else []
+            #     ),
+            # },
         )
         for _, row in page_table.iterrows()
     ]
@@ -40,7 +40,7 @@ if __name__ == "__main__":
     prompt_helper = PromptHelper(
         context_window=4096,  # LLMが一度に処理できる最大トークン数（約4000単語程度）
         num_output=256,  # 生成される回答の最大トークン数（長文回答の制御）
-        chunk_overlap_ratio=0.05,  # テキストを分割する際の「重なり率」（重要な文脈が失われないようにするため）
+        chunk_overlap_ratio=0.5,  # テキストを分割する際の「重なり率」（重要な文脈が失われないようにするため）
     )
     storage_context = StorageContext.from_defaults()  # ローカルに保存
     index = GPTVectorStoreIndex.from_documents(
