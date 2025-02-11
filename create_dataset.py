@@ -65,7 +65,7 @@ def extract_text_from_pdf(_file_path: Path) -> list[str]:
 
 
 def append_to_file_table(
-        df: pd.DataFrame, _file_id: str, _file_path: Path
+    df: pd.DataFrame, _file_id: str, _file_path: Path
 ) -> pd.DataFrame:
     new_data = {
         "file_id": [_file_id],
@@ -76,7 +76,7 @@ def append_to_file_table(
 
 
 def append_to_page_table(
-        df: pd.DataFrame, _index: int, _file_id: str, _text: str
+    df: pd.DataFrame, _index: int, _file_id: str, _text: str
 ) -> pd.DataFrame:
     new_data = {
         "page_id": [_file_id + "_" + str(_index)],

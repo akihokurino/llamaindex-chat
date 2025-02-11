@@ -60,20 +60,20 @@ REFINE_PROMPT = PromptTemplate(
 
 class CustomDebugHandler(BaseCallbackHandler):
     def __init__(
-            self,
-            event_starts_to_ignore: Optional[list[CBEventType]] = None,
-            event_ends_to_ignore: Optional[list[CBEventType]] = None,
+        self,
+        event_starts_to_ignore: Optional[list[CBEventType]] = None,
+        event_ends_to_ignore: Optional[list[CBEventType]] = None,
     ) -> None:
         super().__init__(event_starts_to_ignore or [], event_ends_to_ignore or [])
         self.prompts = []
 
     def on_event_start(
-            self,
-            event_type: CBEventType,
-            payload: Optional[dict[str, Any]] = None,
-            event_id: str = "",
-            parent_id: str = "",
-            **kwargs: Any,
+        self,
+        event_type: CBEventType,
+        payload: Optional[dict[str, Any]] = None,
+        event_id: str = "",
+        parent_id: str = "",
+        **kwargs: Any,
     ) -> str:
         if event_type == CBEventType.LLM and payload:
             messages = payload.get(EventPayload.MESSAGES)
@@ -86,11 +86,11 @@ class CustomDebugHandler(BaseCallbackHandler):
         return event_id
 
     def on_event_end(
-            self,
-            event_type: CBEventType,
-            payload: Optional[dict[str, Any]] = None,
-            event_id: str = "",
-            **kwargs: Any,
+        self,
+        event_type: CBEventType,
+        payload: Optional[dict[str, Any]] = None,
+        event_id: str = "",
+        **kwargs: Any,
     ) -> None:
         pass
 
@@ -98,9 +98,9 @@ class CustomDebugHandler(BaseCallbackHandler):
         pass
 
     def end_trace(
-            self,
-            trace_id: Optional[str] = None,
-            trace_map: Optional[dict[str, list[str]]] = None,
+        self,
+        trace_id: Optional[str] = None,
+        trace_map: Optional[dict[str, list[str]]] = None,
     ) -> None:
         pass
 
@@ -137,7 +137,7 @@ class _ChatCompletionPayload(BaseModel):
 
 
 async def _chat_completion_stream(
-        payload: _ChatCompletionPayload,
+    payload: _ChatCompletionPayload,
 ) -> AsyncGenerator[str, None]:
     custom_debug_handler.prompts.clear()
     user_message = payload.messages[-1].content
@@ -156,7 +156,7 @@ async def _chat_completion_stream(
 
 @app.post("/chat_completion")
 async def _chat_completion(
-        payload: _ChatCompletionPayload,
+    payload: _ChatCompletionPayload,
 ) -> StreamingResponse:
     return StreamingResponse(_chat_completion_stream(payload), media_type="text/plain")
 
