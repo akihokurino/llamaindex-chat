@@ -13,3 +13,9 @@ types:
 
 run-server:
 	source venv/bin/activate && python -m server
+
+create-dataset:
+	source venv/bin/activate && python -m create_dataset
+
+create-index:
+	source venv/bin/activate && python -m create_index

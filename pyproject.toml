@@ -6,14 +6,18 @@ authors = [
     { name = "None" }
 ]
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.13,<4.0"
 dependencies = [
     "black (>=25.1.0,<26.0.0)",
     "python-dotenv (>=1.0.1,<2.0.0)",
     "fastapi (>=0.115.8,<0.116.0)",
     "openai (>=1.61.1,<2.0.0)",
     "mypy (>=1.15.0,<2.0.0)",
-    "uvicorn (>=0.34.0,<0.35.0)"
+    "uvicorn (>=0.34.0,<0.35.0)",
+    "pandas (>=2.2.3,<3.0.0)",
+    "pandas-stubs (>=2.2.3.241126,<3.0.0.0)",
+    "pypdf (>=5.3.0,<6.0.0)",
+    "llama-index (>=0.12.16,<0.13.0)"
 ]
 
 
