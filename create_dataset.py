@@ -1,41 +1,15 @@
 from __future__ import annotations
 
-import json
-import os
 import pickle
 import uuid
 from datetime import datetime
 from pathlib import Path
-from typing import Any
 
 import pandas as pd
 from dotenv import load_dotenv
-from openai import OpenAI
 from pypdf import PdfReader
 
 load_dotenv()
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-openAIClient = OpenAI(
-    api_key=OPENAI_API_KEY,
-)
-
-SYSTEM_PROMPT = """
-あなたはプロフェッショナルの編集者です。
-与えられた文書情報を簡潔かつ明確に要約することが得意です。
-"""
-
-USER_PROMPT_TEMPLATE = """
-以下の文章は PDF から抽出した1ページ分のテキストです。
-この内容を簡潔に要約し、関連するタグも抽出してください。
-JSON形式で出力してください。
-
-# 出力フォーマット
-- 要約: xxx
-- タグ: [xxx, xxx, xxx]
-
-# テキスト
-{text}
-"""
 
 
 def create_file_table_df() -> pd.DataFrame:
@@ -91,7 +65,7 @@ def extract_text_from_pdf(_file_path: Path) -> list[str]:
 
 
 def append_to_file_table(
-    df: pd.DataFrame, _file_id: str, _file_path: Path
+        df: pd.DataFrame, _file_id: str, _file_path: Path
 ) -> pd.DataFrame:
     new_data = {
         "file_id": [_file_id],
@@ -102,7 +76,7 @@ def append_to_file_table(
 
 
 def append_to_page_table(
-    df: pd.DataFrame, _index: int, _file_id: str, _text: str
+        df: pd.DataFrame, _index: int, _file_id: str, _text: str
 ) -> pd.DataFrame:
     new_data = {
         "page_id": [_file_id + "_" + str(_index)],
@@ -111,65 +85,6 @@ def append_to_page_table(
         "text": [_text],
     }
     return pd.concat([df, pd.DataFrame(new_data)], ignore_index=True)
-
-
-def get_llm_features(_text: str) -> dict[str, Any]:
-    user_prompt = USER_PROMPT_TEMPLATE.format(text=_text[:4000])
-
-    response = openAIClient.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": user_prompt},
-        ],
-        response_format={"type": "json_object"},
-    )
-
-    content = response.choices[0].message.content
-    if content is None:
-        return {"要約": "", "出典": "", "タグ": []}
-    try:
-        result: dict[str, Any] = json.loads(content)
-        return result
-    except json.JSONDecodeError:
-        return {"要約": "", "出典": "", "タグ": []}
-
-
-def append_to_page_table_llm_features(
-    df: pd.DataFrame, _cache_dir: Path
-) -> pd.DataFrame:
-    cache_path = _cache_dir / "page_table_with_llm.pkl"
-
-    if cache_path.exists():
-        with open(cache_path, "rb") as f:
-            cached_df: pd.DataFrame = pickle.load(f)
-        print("✅ キャッシュから要約データを読み込みました。")
-        return cached_df
-
-    print("⏳ Summaryを取得中...")
-    summaries: list[str] = []
-    tags: list[list[str]] = []
-    for index, (_, row) in enumerate(df.iterrows()):
-        input_text = str(row["text"])
-
-        if not input_text.strip():
-            summaries.append("")
-            tags.append([])
-            continue
-
-        llm_result = get_llm_features(input_text)
-        summaries.append(llm_result.get("要約", ""))
-        tags.append(llm_result.get("タグ", []))
-        print(f"Processing {index + 1}/{len(df)}")
-
-    df["summary"] = summaries
-    df["tags"] = tags
-
-    with open(cache_path, "wb") as f:
-        pickle.dump(df, f)
-    print("✅ 要約結果をキャッシュに保存しました。")
-
-    return df
 
 
 if __name__ == "__main__":
@@ -183,7 +98,5 @@ if __name__ == "__main__":
     cache_dir.mkdir(exist_ok=True)
 
     file_table_df, page_table_df = create_dataframes()
-    page_table_df = append_to_page_table_llm_features(page_table_df, cache_dir)
-
     file_table_df.to_csv(output_dir / "file_table.csv", index=False)
     page_table_df.to_csv(output_dir / "page_table.csv", index=False)
