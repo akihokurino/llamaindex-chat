@@ -81,7 +81,7 @@ class _ChatCompletionPayload(BaseModel):
 
 
 async def _chat_completion_stream(
-        payload: _ChatCompletionPayload,
+    payload: _ChatCompletionPayload,
 ) -> AsyncGenerator[str, None]:
     user_message = payload.messages[-1].content
     response = query_engine.query(user_message)
@@ -91,7 +91,7 @@ async def _chat_completion_stream(
 
 @app.post("/chat_completion")
 async def _chat_completion(
-        payload: _ChatCompletionPayload,
+    payload: _ChatCompletionPayload,
 ) -> StreamingResponse:
     return StreamingResponse(_chat_completion_stream(payload), media_type="text/plain")
 
