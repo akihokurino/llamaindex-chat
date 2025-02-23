@@ -7,4 +7,4 @@
 - openai
 
 ## Links
-https://zenn.dev/nomhiro/articles/llama-index-abstract
+- https://zenn.dev/nomhiro/articles/llama-index-abstract
